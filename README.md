@@ -321,3 +321,5 @@ This project is developed for educational purposes as part of the Webknot Techno
 ---
 
 **Note**: This README was written personally without AI assistance as per the assignment requirements. The project demonstrates understanding of full-stack development, database design, API development, and user experience design principles.
+#   C a m p u s - E v e n t - M a n a g e m e n t - P l a t f o r m  
+ 
