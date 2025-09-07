@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Management - Admin Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: white;
+            font-size: 1rem;
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0.25rem;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-published {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏛️ Campus Event Management</h1>
+        <p>Admin Portal - Manage events, track attendance, and generate reports</p>
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="showTab('events')">Events</button>
+            <button class="nav-tab" onclick="showTab('attendance')">Attendance</button>
+            <button class="nav-tab" onclick="showTab('reports')">Reports</button>
+            <button class="nav-tab" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">Total Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Total Registrations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Attendance Count</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">91%</div>
+                    <div class="stat-label">Attendance Rate</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Recent Activity</h3>
+                <div class="chart-container">
+                    📈 Event Registration Trends Chart
+                    <br><small>Integration with Chart.js would show real data here</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Quick Actions</h3>
+                <button class="btn" onclick="showTab('events')">Create New Event</button>
+                <button class="btn btn-secondary" onclick="showTab('reports')">Generate Report</button>
+                <button class="btn btn-secondary">Export Data</button>
+            </div>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events" class="tab-content">
+            <div class="card">
+                <h3>📅 Event Management</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" onclick="openModal('eventModal')">+ Create New Event</button>
+                    <button class="btn btn-secondary">Filter Events</button>
+                    <button class="btn btn-secondary">Export Events</button>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Event Title</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Registrations</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Web Development Workshop</td>
+                            <td>2024-09-15</td>
+                            <td>Workshop</td>
+                            <td>28/30</td>
+                            <td><span class="status-badge status-published">Published</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+                                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">View</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>24-Hour Coding Challenge</td>
+                            <td>2024-09-22</td>
+                            <td>Hackathon</td>
+                            <td>45/50</td>
+                            <td><span class="status-badge status-published">Published</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+                                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">View</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>AI and ML Trends Talk</td>
+                            <td>2024-09-10</td>
+                            <td>Tech Talk</td>
+                            <td>95/100</td>
+                            <td><span class="status-badge status-completed">Completed</span></td>
+                            <td>
+                                <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">View</button>
+                                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Report</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="card">
+                <h3>✅ Attendance Management</h3>
+                <div style="margin-bottom: 1rem;">
+                    <select style="width: 200px; display: inline-block; margin-right: 1rem;">
+                        <option>Select Event</option>
+                        <option>Web Development Workshop</option>
+                        <option>24-Hour Coding Challenge</option>
+                    </select>
+                    <button class="btn">View Attendance</button>
+                    <button class="btn btn-secondary">Export Attendance</button>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Student ID</th>
+                            <th>Check-in Time</th>
+                            <th>Check-out Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>STU001</td>
+                            <td>09:15 AM</td>
+                            <td>04:45 PM</td>
+                            <td><span class="status-badge status-published">Present</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>STU002</td>
+                            <td>09:20 AM</td>
+                            <td>-</td>
+                            <td><span class="status-badge status-published">Present</span></td>
+                        </tr>
+                        <tr>
+                            <td>Bob Johnson</td>
+                            <td>STU003</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><span class="status-badge status-cancelled">Absent</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <h3>📊 Event Reports</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" onclick="generateReport('popularity')">Event Popularity Report</button>
+                    <button class="btn" onclick="generateReport('participation')">Student Participation Report</button>
+                    <button class="btn" onclick="generateReport('attendance')">Attendance Summary</button>
+                    <button class="btn" onclick="generateReport('feedback')">Feedback Summary</button>
+                </div>
+
+                <div class="card">
+                    <h3>📈 Event Popularity Report</h3>
+                    <div class="chart-container">
+                        📊 Bar Chart showing events by registration count
+                        <br><small>Most Popular: Tech Fest 2024 (156 registrations)</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>👥 Top Active Students</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student Name</th>
+                                <th>Events Attended</th>
+                                <th>Attendance Rate</th>
+                                <th>Avg Rating Given</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Alice Johnson</td>
+                                <td>8</td>
+                                <td>100%</td>
+                                <td>4.8</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Bob Smith</td>
+                                <td>7</td>
+                                <td>95%</td>
+                                <td>4.5</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Carol Davis</td>
+                                <td>6</td>
+                                <td>92%</td>
+                                <td>4.7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h3>⚙️ College Settings</h3>
+                <div class="form-group">
+                    <label>College Name</label>
+                    <input type="text" value="Tech University" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" value="admin@techuniv.edu" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Default Event Capacity</label>
+                    <input type="number" value="50">
+                </div>
+                <button class="btn">Save Settings</button>
+            </div>
+
+            <div class="card">
+                <h3>👥 User Management</h3>
+                <button class="btn">Add New Admin</button>
+                <button class="btn btn-secondary">Manage Students</button>
+                <button class="btn btn-secondary">Import Students</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Creation Modal -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('eventModal')">&times;</span>
+            <h3>Create New Event</h3>
+            <form>
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" placeholder="Enter event title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea placeholder="Enter event description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Date</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select required>
+                            <option value="">Select Category</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="hackathon">Hackathon</option>
+                            <option value="seminar">Seminar</option>
+                            <option value="fest">Fest</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" placeholder="Enter event location">
+                </div>
+                <div class="form-group">
+                    <label>Capacity</label>
+                    <input type="number" placeholder="Maximum attendees" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Registration Deadline</label>
+                    <input type="datetime-local">
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('eventModal')">Cancel</button>
+                    <button type="submit" class="btn">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function generateReport(reportType) {
+            alert(`Generating ${reportType} report...`);
+            // In a real application, this would make an API call to generate the report
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

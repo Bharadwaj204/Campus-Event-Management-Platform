@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Events - Student App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            padding: 1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .event-card {
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .event-meta span {
+            background: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .event-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-registered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-full {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            background: white;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-tab {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .star.active {
+            color: #ffc107;
+        }
+
+        .star:hover {
+            color: #ffc107;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .event-actions {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 Campus Events</h1>
+        <p>Discover and join amazing events</p>
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('events')">Events</button>
+            <button class="nav-tab" onclick="showTab('my-events')">My Events</button>
+            <button class="nav-tab" onclick="showTab('attendance')">Attendance</button>
+            <button class="nav-tab" onclick="showTab('profile')">Profile</button>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events" class="tab-content active">
+            <input type="text" class="search-bar" placeholder="🔍 Search events..." onkeyup="filterEvents()">
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterByCategory('all')">All</button>
+                <button class="filter-tab" onclick="filterByCategory('workshop')">Workshop</button>
+                <button class="filter-tab" onclick="filterByCategory('hackathon')">Hackathon</button>
+                <button class="filter-tab" onclick="filterByCategory('seminar')">Seminar</button>
+                <button class="filter-tab" onclick="filterByCategory('fest')">Fest</button>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">Web Development Workshop</div>
+                <div class="event-meta">
+                    <span>📅 Sep 15, 2024</span>
+                    <span>🕘 9:00 AM - 5:00 PM</span>
+                    <span>📍 Computer Lab 1</span>
+                    <span>👥 28/30</span>
+                </div>
+                <div class="event-description">
+                    Learn modern web development with React and Node.js. Perfect for beginners and intermediate developers.
+                </div>
+                <div class="event-actions">
+                    <button class="btn btn-success" onclick="registerEvent(1)">Register</button>
+                    <button class="btn btn-secondary" onclick="viewEventDetails(1)">Details</button>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">24-Hour Coding Challenge</div>
+                <div class="event-meta">
+                    <span>📅 Sep 22, 2024</span>
+                    <span>🕘 10:00 AM - 10:00 AM</span>
+                    <span>📍 Main Auditorium</span>
+                    <span>👥 45/50</span>
+                </div>
+                <div class="event-description">
+                    Build innovative solutions in 24 hours. Prizes for top 3 teams!
+                </div>
+                <div class="event-actions">
+                    <button class="btn btn-success" onclick="registerEvent(2)">Register</button>
+                    <button class="btn btn-secondary" onclick="viewEventDetails(2)">Details</button>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">AI and ML Trends Talk</div>
+                <div class="event-meta">
+                    <span>📅 Sep 10, 2024</span>
+                    <span>🕘 2:00 PM - 4:00 PM</span>
+                    <span>📍 Conference Room A</span>
+                    <span>👥 95/100</span>
+                </div>
+                <div class="event-description">
+                    Explore the latest trends in AI and Machine Learning with industry experts.
+                </div>
+                <div class="event-actions">
+                    <button class="btn" disabled>Event Completed</button>
+                    <button class="btn btn-secondary" onclick="viewEventDetails(3)">Details</button>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">Tech Fest 2024</div>
+                <div class="event-meta">
+                    <span>📅 Sep 28, 2024</span>
+                    <span>🕘 9:00 AM - 6:00 PM</span>
+                    <span>📍 Campus Grounds</span>
+                    <span>👥 156/200</span>
+                </div>
+                <div class="event-description">
+                    Annual technology festival with competitions, exhibitions, and networking opportunities.
+                </div>
+                <div class="event-actions">
+                    <button class="btn btn-success" onclick="registerEvent(4)">Register</button>
+                    <button class="btn btn-secondary" onclick="viewEventDetails(4)">Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Events Tab -->
+        <div id="my-events" class="tab-content">
+            <div class="stats-card">
+                <h3>My Event Activity</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Registered</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Attended</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">Web Development Workshop</div>
+                <div class="event-meta">
+                    <span>📅 Sep 15, 2024</span>
+                    <span>🕘 9:00 AM - 5:00 PM</span>
+                    <span>📍 Computer Lab 1</span>
+                </div>
+                <div class="event-actions">
+                    <span class="status-badge status-registered">Registered</span>
+                    <button class="btn btn-danger" onclick="cancelRegistration(1)">Cancel</button>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">24-Hour Coding Challenge</div>
+                <div class="event-meta">
+                    <span>📅 Sep 22, 2024</span>
+                    <span>🕘 10:00 AM - 10:00 AM</span>
+                    <span>📍 Main Auditorium</span>
+                </div>
+                <div class="event-actions">
+                    <span class="status-badge status-registered">Registered</span>
+                    <button class="btn btn-danger" onclick="cancelRegistration(2)">Cancel</button>
+                </div>
+            </div>
+
+            <div class="card event-card">
+                <div class="event-title">AI and ML Trends Talk</div>
+                <div class="event-meta">
+                    <span>📅 Sep 10, 2024</span>
+                    <span>🕘 2:00 PM - 4:00 PM</span>
+                    <span>📍 Conference Room A</span>
+                </div>
+                <div class="event-actions">
+                    <span class="status-badge status-completed">Attended</span>
+                    <button class="btn btn-secondary" onclick="openModal('feedbackModal')">Rate Event</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="card">
+                <h3>📊 My Attendance Record</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">75%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3/4</div>
+                        <div class="stat-label">Events Attended</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📅 Recent Attendance</h3>
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <div style="font-weight: 600;">AI and ML Trends Talk</div>
+                            <div style="font-size: 0.85rem; color: #666;">Sep 10, 2024</div>
+                        </div>
+                        <span class="status-badge status-registered">Present</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <div style="font-weight: 600;">Data Science Workshop</div>
+                            <div style="font-size: 0.85rem; color: #666;">Sep 5, 2024</div>
+                        </div>
+                        <span class="status-badge status-registered">Present</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <div style="font-weight: 600;">Mobile App Development</div>
+                            <div style="font-size: 0.85rem; color: #666;">Sep 1, 2024</div>
+                        </div>
+                        <span class="status-badge status-registered">Present</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
+                        <div>
+                            <div style="font-weight: 600;">Blockchain Seminar</div>
+                            <div style="font-size: 0.85rem; color: #666;">Aug 28, 2024</div>
+                        </div>
+                        <span class="status-badge status-full">Absent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profile" class="tab-content">
+            <div class="card">
+                <h3>👤 Profile Information</h3>
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <div style="width: 80px; height: 80px; background: #667eea; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                        JD
+                    </div>
+                    <div style="font-weight: 600; font-size: 1.1rem;">John Doe</div>
+                    <div style="color: #666; font-size: 0.9rem;">STU001</div>
+                    <div style="color: #666; font-size: 0.9rem;">john.doe@techuniv.edu</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 My Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Events Registered</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Events Attended</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">4.5</div>
+                        <div class="stat-label">Avg Rating Given</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">75%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚙️ Settings</h3>
+                <button class="btn" style="width: 100%; margin-bottom: 0.5rem;">Edit Profile</button>
+                <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">Notification Settings</button>
+                <button class="btn btn-danger" style="width: 100%;">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="eventDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('eventDetailsModal')">&times;</span>
+            <h3>Event Details</h3>
+            <div id="eventDetailsContent">
+                <!-- Event details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('feedbackModal')">&times;</span>
+            <h3>Rate Event</h3>
+            <form>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Rating</label>
+                    <div class="rating-stars">
+                        <span class="star" onclick="setRating(1)">★</span>
+                        <span class="star" onclick="setRating(2)">★</span>
+                        <span class="star" onclick="setRating(3)">★</span>
+                        <span class="star" onclick="setRating(4)">★</span>
+                        <span class="star" onclick="setRating(5)">★</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Comments (Optional)</label>
+                    <textarea style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; height: 80px; resize: vertical;" placeholder="Share your thoughts about this event..."></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('feedbackModal')">Cancel</button>
+                    <button type="submit" class="btn">Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentRating = 0;
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+
+        function filterByCategory(category) {
+            // Remove active class from all filter tabs
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            filterTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked filter tab
+            event.target.classList.add('active');
+            
+            // In a real app, this would filter events by category
+            console.log('Filtering by category:', category);
+        }
+
+        function filterEvents() {
+            const searchTerm = event.target.value.toLowerCase();
+            // In a real app, this would filter events by search term
+            console.log('Searching for:', searchTerm);
+        }
+
+        function registerEvent(eventId) {
+            if (confirm('Are you sure you want to register for this event?')) {
+                // In a real app, this would make an API call to register
+                alert('Successfully registered for the event!');
+                event.target.textContent = 'Registered';
+                event.target.disabled = true;
+                event.target.classList.remove('btn-success');
+                event.target.classList.add('btn-secondary');
+            }
+        }
+
+        function cancelRegistration(eventId) {
+            if (confirm('Are you sure you want to cancel your registration?')) {
+                // In a real app, this would make an API call to cancel
+                alert('Registration cancelled successfully!');
+                // Remove the event card or update its status
+            }
+        }
+
+        function viewEventDetails(eventId) {
+            // In a real app, this would fetch event details from API
+            const eventDetails = {
+                1: {
+                    title: 'Web Development Workshop',
+                    description: 'Learn modern web development with React and Node.js. Perfect for beginners and intermediate developers.',
+                    date: 'September 15, 2024',
+                    time: '9:00 AM - 5:00 PM',
+                    location: 'Computer Lab 1',
+                    capacity: '30 participants',
+                    requirements: 'Laptop with VS Code installed'
+                }
+            };
+            
+            const event = eventDetails[eventId] || eventDetails[1];
+            document.getElementById('eventDetailsContent').innerHTML = `
+                <h4>${event.title}</h4>
+                <p><strong>Date:</strong> ${event.date}</p>
+                <p><strong>Time:</strong> ${event.time}</p>
+                <p><strong>Location:</strong> ${event.location}</p>
+                <p><strong>Capacity:</strong> ${event.capacity}</p>
+                <p><strong>Requirements:</strong> ${event.requirements}</p>
+                <p><strong>Description:</strong></p>
+                <p>${event.description}</p>
+            `;
+            
+            openModal('eventDetailsModal');
+        }
+
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
